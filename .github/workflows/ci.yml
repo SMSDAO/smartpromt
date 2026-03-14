@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "copilot/**"]
+  pull_request:
+    branches: ["main"]
+  release:
+    types: [published]
+
+# Minimal default permissions for all jobs
+permissions:
+  contents: read
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Type-check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run tests
+        run: npm test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      # Provide placeholder values so the build doesn't fail when
+      # real secrets are absent (build-time checks are skipped by Next.js
+      # when the values are present but empty or placeholder).
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder_anon_key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: placeholder_wc_project_id
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        if: github.event_name == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: .next/
+          retention-days: 7
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
