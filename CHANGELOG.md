@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2026-03-14
+## [Unreleased]
 
 ### 🎉 First Production Release
 
@@ -77,6 +77,6 @@ This is the initial release — no migration steps required.
 
 ## Links
 
-- [Repository](https://github.com/SMSDAO/smartpromt)
+- [Repository](https://github.com/SMSDAO/SmartPromts)
 - [Documentation](./docs/README.md)
 - [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSMSDAO%2FSmartPromts)

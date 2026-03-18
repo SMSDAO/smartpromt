@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   rateLimit,
   clearRateLimit,
@@ -37,18 +37,22 @@ describe('rateLimit (in-memory)', () => {
   })
 
   it('resets after the interval has elapsed', () => {
-    // Exhaust the limit with a very short window
-    for (let i = 0; i < 2; i++) {
-      rateLimit(TEST_ID, { limit: 2, interval: 1 }) // 1 ms window
+    vi.useFakeTimers()
+    try {
+      for (let i = 0; i < 2; i++) {
+        rateLimit(TEST_ID, { limit: 2, interval: 60_000 })
+      }
+      // Confirm the limit is exhausted
+      expect(rateLimit(TEST_ID, { limit: 2, interval: 60_000 }).success).toBe(false)
+
+      // Advance fake time past the window
+      vi.advanceTimersByTime(60_001)
+
+      const result = rateLimit(TEST_ID, { limit: 2, interval: 60_000 })
+      expect(result.success).toBe(true)
+    } finally {
+      vi.useRealTimers()
     }
-    // Wait for the window to expire
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const result = rateLimit(TEST_ID, { limit: 2, interval: 1 })
-        expect(result.success).toBe(true)
-        resolve()
-      }, 20)
-    })
   })
 })
 
@@ -80,3 +84,4 @@ describe('clearRateLimit', () => {
     expect(result.success).toBe(true)
   })
 })
+

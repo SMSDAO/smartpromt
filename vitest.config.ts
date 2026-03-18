@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitest/config'
-import path from 'path'
+import { fileURLToPath } from 'url'
+
+const projectRoot = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
   test: {
@@ -14,7 +16,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.'),
+      '@': projectRoot,
     },
   },
 })
